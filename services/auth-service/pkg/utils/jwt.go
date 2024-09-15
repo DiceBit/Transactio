@@ -20,7 +20,7 @@ var jwtPublicKey = jwtPrivateKey.Public()*/
 var jwtPrivateKey []byte
 
 func init() {
-	err := godotenv.Load()
+	err := godotenv.Load("../../.env")
 	if err != nil {
 		log.Println("Error loading .env file")
 	}
@@ -28,8 +28,6 @@ func init() {
 }
 
 func GenerateJWT(email string, roles []string) (string, error) {
-	log.Println(string(jwtPrivateKey))
-
 	expirationTime := time.Now().Add(24 * time.Hour)
 
 	claims := &Claims{
