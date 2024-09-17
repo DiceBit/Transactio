@@ -1,0 +1,59 @@
+syntax = "proto3";
+package protobuf;
+
+option go_package = "./proto";
+
+import "google/api/annotations.proto";
+
+service AuthService {
+  //registration
+  rpc SignUp(SignUpRequest) returns (SignUpResponse){
+    option (google.api.http) = {
+      post: "/auth/signup"
+      body: "*"
+    };
+  }
+  //login
+  rpc Login(LoginRequest) returns (LoginResponse){
+    option (google.api.http) = {
+      post: "/auth/login"
+      body: "*"
+    };
+  }
+
+  rpc ValidateJWT(JwtRequest) returns (JwtResponse);
+}
+
+message SignUpRequest {
+  string Username = 1;
+  string Email = 2;
+  string Password = 3;
+}
+message SignUpResponse {
+  string Token = 1;
+  /*string Username = 1;
+  string Email = 2;
+  repeated string Roles = 3;*/
+}
+
+
+message LoginRequest {
+  string Email = 1;
+  string Password = 2;
+}
+message LoginResponse {
+  string Token = 1;
+}
+
+
+message JwtRequest {
+  string Token = 1;
+}
+message JwtResponse {
+  string Email = 1;
+  repeated string Roles = 2;
+  
+  int64 exp = 3;  // время окончания действия токена (например, UNIX time)
+  int64 iat = 4;  // время выпуска токена
+  int64 nbr = 5;  // время, с которого токен считается действительным
+}

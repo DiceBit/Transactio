@@ -14,8 +14,3 @@ type User struct {
 
 	CreateAt pgtype.Timestamp
 }
-
-const (
-	user  = iota
-	admin = iota
-)

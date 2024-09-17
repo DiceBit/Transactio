@@ -27,8 +27,14 @@ func init() {
 	jwtPrivateKey = []byte(os.Getenv("JWT_SECRET"))
 }
 
+func Int64ToNumericDate(ts int64) *jwt.NumericDate {
+	tm := time.Unix(ts, 0)
+	return jwt.NewNumericDate(tm)
+}
+
 func GenerateJWT(email string, roles []string) (string, error) {
 	expirationTime := time.Now().Add(24 * time.Hour)
+	nowTime := time.Now().Unix()
 
 	claims := &Claims{
 		Email: email,
@@ -36,6 +42,8 @@ func GenerateJWT(email string, roles []string) (string, error) {
 
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
+			IssuedAt:  Int64ToNumericDate(nowTime),
+			NotBefore: Int64ToNumericDate(nowTime),
 		},
 	}
 
