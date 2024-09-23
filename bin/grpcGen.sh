@@ -1,8 +1,8 @@
 #(user server)
 echo "Protobuf for auth-service"
-#cd "/c/Users/danii/PROGRAMMING/GolandProjects/Ecommers"
+cd "/c/Users/danii/PROGRAMMING/GolandProjects/Ecommers"
 protoc -I . \
-      -I$GOPATH/Ecommers/google-api/googleapis \
+      -I$GOPATH/google-api/googleapis \
       services/auth-service/pkg/gRPC/auth.proto \
       --go_out=services/auth-service/pkg/gRPC \
       --go-grpc_out=services/auth-service/pkg/gRPC
@@ -18,9 +18,9 @@ protoc -I . \
 
 #(api gateway)
 echo "Protobuf for api-gateway"
-#cd "/c/Users/danii/PROGRAMMING/GolandProjects/Ecommers"
+cd "/c/Users/danii/PROGRAMMING/GolandProjects/Ecommers"
 protoc -I . \
-      -I$GOPATH/Ecommers/google-api/googleapis \
+      -I$GOPATH/google-api/googleapis \
       --grpc-gateway_out=logtostderr=true:services/api-gateway/gRPC \
       services/auth-service/pkg/gRPC/auth.proto \
       --go_out=services/api-gateway/gRPC \

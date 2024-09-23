@@ -31,9 +31,6 @@ message SignUpRequest {
 }
 message SignUpResponse {
   string Token = 1;
-  /*string Username = 1;
-  string Email = 2;
-  repeated string Roles = 3;*/
 }
 
 
@@ -52,7 +49,7 @@ message JwtRequest {
 message JwtResponse {
   string Email = 1;
   repeated string Roles = 2;
-  
+
   int64 exp = 3;  // время окончания действия токена (например, UNIX time)
   int64 iat = 4;  // время выпуска токена
   int64 nbr = 5;  // время, с которого токен считается действительным

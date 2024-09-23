@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"log"
+	"go.uber.org/zap"
 	"os"
 	"strconv"
 )
@@ -13,11 +13,13 @@ type DB struct {
 	pool *pgxpool.Pool
 }
 
-func New() (*pgxpool.Pool, error) {
+func New(logger *zap.Logger) (*pgxpool.Pool, error) {
 	port, err := strconv.Atoi(os.Getenv("PORT_POSTGRES"))
 	if err != nil {
+		logger.Error("Error convert string to integer", zap.Error(err))
 		return nil, err
 	}
+
 	pgxInfo := fmt.Sprintf(
 		"host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 		os.Getenv("HOST_POSTGRES"),
@@ -28,6 +30,7 @@ func New() (*pgxpool.Pool, error) {
 
 	pgxConn, err := pgxpool.New(context.Background(), pgxInfo)
 	if err != nil {
+		logger.Error("Error with pgxpool connect", zap.Error(err))
 		return nil, err
 	}
 
@@ -35,7 +38,6 @@ func New() (*pgxpool.Pool, error) {
 	if err != nil {
 		return nil, err
 	}
-	log.Println("DB connected")
-
+	logger.Info("DB connected")
 	return pgxConn, nil
 }
