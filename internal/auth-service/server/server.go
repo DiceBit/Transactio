@@ -1,9 +1,9 @@
 package server
 
 import (
-	"auth-service/pkg/db/pgx"
-	pb "auth-service/pkg/gRPC/proto"
-	"auth-service/pkg/utils"
+	"Transactio/internal/auth-service/db/pgx"
+	pb "Transactio/internal/auth-service/gRPC/proto"
+	"Transactio/internal/auth-service/utils"
 	"fmt"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"

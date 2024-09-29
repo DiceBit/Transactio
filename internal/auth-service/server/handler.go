@@ -1,8 +1,8 @@
 package server
 
 import (
-	pb "auth-service/pkg/gRPC/proto"
-	userUtils "auth-service/pkg/utils"
+	pb "Transactio/internal/auth-service/gRPC/proto"
+	userUtils "Transactio/internal/auth-service/utils"
 	"context"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"go.uber.org/zap"

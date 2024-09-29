@@ -1,7 +1,7 @@
 package services
 
 import (
-	authService "Transactio/services/api-gateway/gRPC/proto"
+	authService "Transactio/internal/gateway/gRPC/proto"
 	"context"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"

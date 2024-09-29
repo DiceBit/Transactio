@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	authService "Transactio/services/api-gateway/gRPC/proto"
+	authService "Transactio/internal/gateway/gRPC/proto"
 	"context"
 	"fmt"
 	"github.com/google/uuid"

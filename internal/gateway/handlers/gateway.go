@@ -1,9 +1,9 @@
-package gateway
+package handlers
 
 import (
-	"Transactio/services/api-gateway/gateway/services"
-	"Transactio/services/api-gateway/middleware"
-	"Transactio/services/api-gateway/utils"
+	"Transactio/internal/gateway/middleware"
+	"Transactio/internal/gateway/services"
+	"Transactio/internal/gateway/utils"
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"

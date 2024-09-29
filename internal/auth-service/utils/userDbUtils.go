@@ -1,8 +1,8 @@
 package utils
 
 import (
-	pb "auth-service/pkg/gRPC/proto"
-	"auth-service/pkg/models"
+	pb "Transactio/internal/auth-service/gRPC/proto"
+	"Transactio/internal/auth-service/models"
 	"context"
 	"errors"
 	"github.com/jackc/pgx/v5"
