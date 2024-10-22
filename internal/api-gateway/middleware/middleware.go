@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	authService "Transactio/internal/gateway/gRPC/proto"
+	authService "Transactio/internal/api-gateway/gRPC/proto"
 	"context"
 	"fmt"
 	"github.com/google/uuid"
@@ -22,7 +22,7 @@ var md metadata.MD
 var requestUUID uuid.UUID
 
 func MetaDataForGW(_ context.Context, _ *http.Request) metadata.MD {
-	/*add metadata for grpc-gateway methods (login, signup)*/
+	/*add metadata for grpc-api-gateway methods (login, signup)*/
 	md = metadata.Pairs(string(requestId), requestUUID.String())
 	return md
 }
@@ -42,10 +42,17 @@ func LoggerMiddleware(logger *zap.Logger) func(http.Handler) http.Handler {
 
 			next.ServeHTTP(rsc, r.WithContext(ctx))
 
+			code := rsc.statusCode
 			logMsg := fmt.Sprintf("%s(%d %s) Response %s in %v, reqId= %v",
 				r.Method, rsc.statusCode, http.StatusText(rsc.statusCode),
 				r.RequestURI, time.Since(start), requestUUID)
-			logger.Info(logMsg)
+
+			if code <= 299 {
+				logger.Info(logMsg)
+			} else if code <= 599 {
+				logger.Warn(logMsg)
+			}
+
 		})
 	}
 }

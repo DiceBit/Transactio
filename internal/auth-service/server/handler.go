@@ -1,6 +1,7 @@
 package server
 
 import (
+	"Transactio/internal/auth-service/db"
 	pb "Transactio/internal/auth-service/gRPC/proto"
 	userUtils "Transactio/internal/auth-service/utils"
 	"context"
@@ -26,7 +27,7 @@ type AuthServiceServer struct {
 func (authServ *AuthServiceServer) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
 	logger := authServ.logger
 
-	usr, err := userUtils.UsrByEmail(ctx, authServ.db, req.Email)
+	usr, err := pgxDb.UsrByEmail(ctx, authServ.db, req.Email)
 	if err != nil {
 		logger.Error(
 			"Error with getting usr by email",
@@ -63,7 +64,7 @@ func (authServ *AuthServiceServer) Login(ctx context.Context, req *pb.LoginReque
 // registration
 func (authServ *AuthServiceServer) SignUp(ctx context.Context, req *pb.SignUpRequest) (*pb.SignUpResponse, error) {
 	logger := authServ.logger
-	exist, err := userUtils.CheckIfExistUsr(ctx, authServ.db, req)
+	exist, err := pgxDb.CheckIfExistUsr(ctx, authServ.db, req)
 	if err != nil {
 		logger.Error(
 			"Error with checking usr in DB",
@@ -79,7 +80,7 @@ func (authServ *AuthServiceServer) SignUp(ctx context.Context, req *pb.SignUpReq
 		)
 		return nil, status.Errorf(codes.AlreadyExists, "User(%s) already exists", req.Username)
 	} else {
-		err = userUtils.AddUser(ctx, authServ.db, req)
+		err = pgxDb.AddUser(ctx, authServ.db, req)
 		if err != nil {
 			logger.Error(
 				"Error with adding usr",
@@ -94,7 +95,7 @@ func (authServ *AuthServiceServer) SignUp(ctx context.Context, req *pb.SignUpReq
 		)
 	}
 
-	usr, err := userUtils.UsrByEmail(ctx, authServ.db, req.Email)
+	usr, err := pgxDb.UsrByEmail(ctx, authServ.db, req.Email)
 	if err != nil {
 		logger.Error("Error with getting usr by email",
 			zap.String("email", req.Email))

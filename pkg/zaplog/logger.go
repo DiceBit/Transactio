@@ -1,4 +1,4 @@
-package utils
+package zaplog
 
 import (
 	"go.uber.org/zap"
@@ -7,7 +7,6 @@ import (
 )
 
 func NewLogger(filePath string) *zap.Logger {
-
 	var file *os.File
 	file, err := os.OpenFile(filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 	if err != nil {

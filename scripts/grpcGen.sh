@@ -8,12 +8,12 @@ protoc -I . \
       --go-grpc_out=internal/auth-service/gRPC
 
 
-#(api gateway)
+#(api api-gateway)
 echo "Protobuf for api-gateway"
 cd "/c/Users/danii/PROGRAMMING/GolandProjects/Transactio"
 protoc -I . \
       -I$GOPATH/google-api/googleapis \
-      --grpc-gateway_out=logtostderr=true:internal/gateway/gRPC \
+      --grpc-gateway_out=logtostderr=true:internal/api-gateway/gRPC \
       internal/auth-service/gRPC/auth.proto \
-      --go_out=internal/gateway/gRPC \
-      --go-grpc_out=internal/gateway/gRPC
+      --go_out=internal/api-gateway/gRPC \
+      --go-grpc_out=internal/api-gateway/gRPC

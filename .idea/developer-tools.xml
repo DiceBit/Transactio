@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DeveloperToolsToolWindowSettingsV1" lastSelectedContentNodeId="notes">
+    <developerToolsConfigurations>
+      <developerToolConfiguration developerToolId="text-format-converter" id="a2982cdf-d088-4fd8-a19e-c6ada255ec5f" name="Workbench">
+        <properties>
+          <property key="secondLanguage" type="CONFIGURATION" value="dev.turingcomplete.intellijdevelopertoolsplugin._internal.tool.ui.converter.CodeFormattingConverter$Language|JSON" />
+        </properties>
+      </developerToolConfiguration>
+      <developerToolConfiguration developerToolId="json-text-escape" id="b7817ec6-808f-45cb-bdb0-47f8dccbe2ab" name="Workbench">
+        <properties>
+          <property key="sourceText" type="INPUT" value="kotlin.String|2024-09-29T18:26:00.010+0300\tINFO\tUnaryCall([2216d5cf-a34a-44fe-b34a-a8446096142d]) Response \/protobuf.AuthService\/ValidateJWT in 622.4\u00B5s\n2024-09-29T18:26:15.344+0300\tINFO\tUnaryCall([863c50ea-8557-49c3-9959-5b072fc56e91]) Request \/protobuf.AuthService\/Login\n2024-09-29T18:26:15.535+0300\tINFO\tUnaryCall([863c50ea-8557-49c3-9959-5b072fc56e91]) Response \/protobuf.AuthService\/Login in 191.7839ms\n2024-09-29T18:26:26.731+0300\tINFO\tUnaryCall([54680637-b2a1-4710-81c9-74e2ffdb448a]) Request \/protobuf.AuthService\/ValidateJWT\n2024-09-29T18:26:26.731+0300\tINFO\tUnaryCall([54680637-b2a1-4710-81c9-74e2ffdb448a]) Response \/protobuf.AuthService\/ValidateJWT in 0s\n2024-09-29T18:26:31.456+0300\tINFO\tUnaryCall([baf1692c-bdbe-4b3b-a115-b7bdf0de2918]) Request \/protobuf.AuthService\/ValidateJWT\n2024-09-29T18:26:31.457+0300\tINFO\tUnaryCall([baf1692c-bdbe-4b3b-a115-b7bdf0de2918]) Response \/protobuf.AuthService\/ValidateJWT in 578.7\u00B5s\n2024-09-29T18:27:08.175+0300\tINFO\tUnaryCall([3c3a827f-bdb2-4523-80a8-9922dc877f95]) Request \/protobuf.AuthService\/SignUp\n2024-09-29T18:27:08.285+0300\tWARN\tUser already exists\t{\&quot;username\&quot;: \&quot;user10\&quot;}" />
+          <property key="targetText" type="INPUT" value="kotlin.String|2024-09-29T18:26:00.010+0300\\tINFO\\tUnaryCall([2216d5cf-a34a-44fe-b34a-a8446096142d]) Response \\\/protobuf.AuthService\\\/ValidateJWT in 622.4\\u00B5s\\n2024-09-29T18:26:15.344+0300\\tINFO\\tUnaryCall([863c50ea-8557-49c3-9959-5b072fc56e91]) Request \\\/protobuf.AuthService\\\/Login\\n2024-09-29T18:26:15.535+0300\\tINFO\\tUnaryCall([863c50ea-8557-49c3-9959-5b072fc56e91]) Response \\\/protobuf.AuthService\\\/Login in 191.7839ms\\n2024-09-29T18:26:26.731+0300\\tINFO\\tUnaryCall([54680637-b2a1-4710-81c9-74e2ffdb448a]) Request \\\/protobuf.AuthService\\\/ValidateJWT\\n2024-09-29T18:26:26.731+0300\\tINFO\\tUnaryCall([54680637-b2a1-4710-81c9-74e2ffdb448a]) Response \\\/protobuf.AuthService\\\/ValidateJWT in 0s\\n2024-09-29T18:26:31.456+0300\\tINFO\\tUnaryCall([baf1692c-bdbe-4b3b-a115-b7bdf0de2918]) Request \\\/protobuf.AuthService\\\/ValidateJWT\\n2024-09-29T18:26:31.457+0300\\tINFO\\tUnaryCall([baf1692c-bdbe-4b3b-a115-b7bdf0de2918]) Response \\\/protobuf.AuthService\\\/ValidateJWT in 578.7\\u00B5s\\n2024-09-29T18:27:08.175+0300\\tINFO\\tUnaryCall([3c3a827f-bdb2-4523-80a8-9922dc877f95]) Request \\\/protobuf.AuthService\\\/SignUp\\n2024-09-29T18:27:08.285+0300\\tWARN\\tUser already exists\\t{\\\&quot;username\\\&quot;: \\\&quot;user10\\\&quot;}" />
+        </properties>
+      </developerToolConfiguration>
+      <developerToolConfiguration developerToolId="jwt-encoder-decoder" id="22273c83-8c5c-4f7a-ad68-d88398d22a16" name="Workbench">
+        <properties>
+          <property key="encodedText" type="INPUT" value="kotlin.String|ewogICJ0eXAiOiJKV1QiLAogICJhbGciOiJIUzI1NiIKfQ.ewogICJqdGkiOiI5NjQ5MmQ1OS0wYWQ1LTRjMDAtODkyZC01OTBhZDVhYzAwZjMiLAogICJzdWIiOiIwMTIzNDU2Nzg5IiwKICAibmFtZSI6IkpvaG4gRG9lIiwKICAiaWF0IjoxNjgxMDQwNTE1Cn0.ZXdvZ0lDSjBlWEFpT2lKS1YxUWlMQW9nSUNKaGJHY2lPaUpJVXpJMU5pSUtmUS4uSXFlTmwzbEhTVWZQZkVZbXR0dmxRcDFzSDlMcEFvUEpsVWlTdjRYUERTRQ" />
+        </properties>
+      </developerToolConfiguration>
+    </developerToolsConfigurations>
+    <expandedGroupNodeIds />
+  </component>
+</project>

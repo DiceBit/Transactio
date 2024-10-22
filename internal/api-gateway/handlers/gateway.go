@@ -1,9 +1,10 @@
 package handlers
 
 import (
-	"Transactio/internal/gateway/middleware"
-	"Transactio/internal/gateway/services"
-	"Transactio/internal/gateway/utils"
+	"Transactio/internal/api-gateway/middleware"
+	"Transactio/internal/api-gateway/services"
+	"Transactio/internal/api-gateway/utils"
+	"Transactio/pkg/zaplog"
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
@@ -45,24 +46,6 @@ func gatewayConf(gateway *GW) {
 	protectedUsr.HandleFunc("/testU", testU)
 }
 
-func (gw *GW) Start() {
-	logger := gw.logger
-	gatewayConf(gw)
-
-	logger.Info(fmt.Sprintf("Server Gateway started on %s", utils.GwServiceAddr))
-	err := http.ListenAndServe(gw.addr, gw.router)
-	if err != nil {
-		logger.Fatal("Error with listening and serve Gateway server", zap.Error(err))
-	}
-}
-
-func (gw *GW) Stop() {
-	gw.logger.Info("Gateway is stopped")
-
-	gw.authSrv.Conn.Close()
-	gw.logger.Sync()
-}
-
 func NewGW(gwAddr string) *GW {
 	//REST
 	router := mux.NewRouter()
@@ -70,7 +53,7 @@ func NewGW(gwAddr string) *GW {
 	//REST-to-GRPC
 	grpcMux := runtime.NewServeMux(runtime.WithMetadata(middleware.MetaDataForGW))
 
-	logger := utils.NewLogger(utils.GwLog)
+	logger := zaplog.NewLogger(utils.GwLog)
 
 	authSrv, err := services.NewAuthServ(utils.AuthServiceAddr)
 	if err != nil {
@@ -89,13 +72,29 @@ func NewGW(gwAddr string) *GW {
 	return &gwSrv
 }
 
+func (gw *GW) Start() {
+	logger := gw.logger
+	gatewayConf(gw)
+
+	logger.Info(fmt.Sprintf("Server Gateway started on %s", utils.GwServiceAddr))
+	err := http.ListenAndServe(gw.addr, gw.router)
+	if err != nil {
+		logger.Fatal("Error with listening and serve Gateway server", zap.Error(err))
+	}
+}
+func (gw *GW) Stop() {
+	gw.logger.Info("Gateway is stopped")
+
+	gw.authSrv.Conn.Close()
+	_ = gw.logger.Sync()
+}
+
 // ----
 // Html test
 // ----
 func testA(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprintln(w, "Hello, Admin. ", req.URL.String())
 }
-
 func testU(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprintln(w, "Hello, User. ", req.URL.String())
 }

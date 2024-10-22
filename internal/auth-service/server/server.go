@@ -1,9 +1,10 @@
 package server
 
 import (
-	"Transactio/internal/auth-service/db/pgx"
 	pb "Transactio/internal/auth-service/gRPC/proto"
 	"Transactio/internal/auth-service/utils"
+	"Transactio/pkg/dbConn/pgx"
+	"Transactio/pkg/zaplog"
 	"fmt"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -41,7 +42,7 @@ func (authServ *AuthServiceServer) StopServe() {
 }
 
 func NewAuthService(authName, authAddr string) *AuthServiceServer {
-	logger := utils.NewLogger(utils.AuthLog)
+	logger := zaplog.NewLogger(utils.AuthLog)
 
 	grpcServer := grpc.NewServer(grpc.UnaryInterceptor(LogInterceptor(logger)))
 

@@ -1,8 +1,9 @@
-package utils
+package pgxDb
 
 import (
 	pb "Transactio/internal/auth-service/gRPC/proto"
 	"Transactio/internal/auth-service/models"
+	"Transactio/internal/auth-service/utils"
 	"context"
 	"errors"
 	"github.com/jackc/pgx/v5"
@@ -25,7 +26,7 @@ func AddUser(ctx context.Context, db *pgxpool.Pool, usrClaims *pb.SignUpRequest)
 
 	usrClaims.Password = string(hashedPassword)
 	usrBalance := 0
-	usrRoles := []string{UserRole}
+	usrRoles := []string{utils.UserRole}
 
 	var batch = &pgx.Batch{}
 	batch.Queue(`insert into Users(username, email, password, balance, role, createat) values ($1,$2,$3,$4,$5, $6)`,
@@ -64,7 +65,6 @@ func UsrByEmail(ctx context.Context, db *pgxpool.Pool, email string) (*models.Us
 	if !rows.Next() {
 		return nil, errors.New("user not found")
 	}
-
 	err = rows.Scan(
 		&usr.Email,
 		&usr.Password,

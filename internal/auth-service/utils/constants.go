@@ -16,7 +16,6 @@ func init() {
 	AuthName = os.Getenv("AUTH_SERV")
 	AuthServiceAddr = os.Getenv("AUTH_ADDR")
 
-	AppEnv = os.Getenv("APP_ENV")
 	AuthLog = os.Getenv("AUTH_LOG")
 
 	jwtPrivateKey = []byte(os.Getenv("JWT_SECRET"))
@@ -26,9 +25,7 @@ func init() {
 var (
 	AuthName        string
 	AuthServiceAddr string
-
-	AppEnv  string
-	AuthLog string
+	AuthLog         string
 
 	jwtPrivateKey []byte
 	expTimeH      int

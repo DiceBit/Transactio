@@ -1,8 +1,8 @@
 package main
 
 import (
-	gateway "Transactio/internal/gateway/handlers"
-	"Transactio/internal/gateway/utils"
+	gateway "Transactio/internal/api-gateway/handlers"
+	"Transactio/internal/api-gateway/utils"
 	"log"
 	"os"
 	"os/signal"
