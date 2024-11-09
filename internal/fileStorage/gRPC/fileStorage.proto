@@ -1,0 +1,35 @@
+syntax = "proto3";
+package protobuf;
+
+option go_package = "./fsProto";
+
+service FileStorage {
+  rpc AddFile(addFileRequest) returns(addFileResponse);
+  rpc GetFile(getFileRequest) returns(getFileResponse);
+  rpc RemoveFile(removeFileRequest) returns(removeFileResponse);
+}
+
+message addFileRequest {
+  bytes File = 1;
+  string Password = 2;
+  bool isSecured = 3;
+}
+message addFileResponse {
+  string cid = 1;
+}
+
+message getFileRequest {
+  string Cid = 1;
+  string Password = 2;
+  bool isSecured = 3;
+}
+message getFileResponse {
+  bytes FileReader = 1;
+}
+
+message removeFileRequest {
+  string Cid = 1;
+}
+message removeFileResponse {
+  bool isDeleted = 1;
+}

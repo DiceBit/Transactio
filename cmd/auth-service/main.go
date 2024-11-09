@@ -1,7 +1,7 @@
 package main
 
 import (
-	"Transactio/internal/auth-service/server"
+	"Transactio/internal/auth-service"
 	"Transactio/internal/auth-service/utils"
 	"log"
 	"os"
@@ -10,7 +10,10 @@ import (
 )
 
 func main() {
-	srv := server.NewAuthService(utils.AuthName, utils.AuthServiceAddr)
+	srv, err := auth_service.NewAuthService(utils.AuthName, utils.AuthServiceAddr)
+	if err != nil {
+		log.Fatal(err)
+	}
 	go srv.RunServe()
 
 	stop := make(chan os.Signal, 1)

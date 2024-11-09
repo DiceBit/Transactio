@@ -1,7 +1,8 @@
 package middleware
 
 import (
-	authService "Transactio/internal/api-gateway/gRPC/proto"
+	authService "Transactio/internal/api-gateway/gRPC/authProto"
+	"Transactio/internal/api-gateway/utils"
 	"context"
 	"fmt"
 	"github.com/google/uuid"
@@ -9,7 +10,6 @@ import (
 	"google.golang.org/grpc/metadata"
 	"log"
 	"net/http"
-	"strings"
 	"time"
 )
 
@@ -38,13 +38,13 @@ func LoggerMiddleware(logger *zap.Logger) func(http.Handler) http.Handler {
 
 			logRequest := fmt.Sprintf("%s Request %s from %s, reqId= %v", r.Method, r.RequestURI, r.RemoteAddr, requestUUID)
 			logger.Info(logRequest)
-			rsc := &ResponseStatusCode{ResponseWriter: w, statusCode: http.StatusOK}
+			rsc := &utils.ResponseStatusCode{ResponseWriter: w, StatusCode: http.StatusOK}
 
 			next.ServeHTTP(rsc, r.WithContext(ctx))
 
-			code := rsc.statusCode
+			code := rsc.StatusCode
 			logMsg := fmt.Sprintf("%s(%d %s) Response %s in %v, reqId= %v",
-				r.Method, rsc.statusCode, http.StatusText(rsc.statusCode),
+				r.Method, rsc.StatusCode, http.StatusText(rsc.StatusCode),
 				r.RequestURI, time.Since(start), requestUUID)
 
 			if code <= 299 {
@@ -67,7 +67,7 @@ func AuthMiddleware(authClient authService.AuthServiceClient) func(http.Handler)
 				return
 			}
 
-			tokenStr := getToken(w, r)
+			tokenStr := utils.GetToken(w, r)
 
 			md = metadata.Pairs(string(requestId), requestUUID.String())
 			ctx := metadata.NewOutgoingContext(context.Background(), md)
@@ -91,7 +91,8 @@ func CheckRole(roles []string) func(http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 			claims, ok := r.Context().Value(userKey).(*authService.JwtResponse)
-			if !ok || !containsRole(claims.Roles, roles) {
+			if !ok || !utils.ContainsRole(claims.Roles, roles) {
+
 				http.Error(w, "Forbidden", http.StatusForbidden)
 				return
 			}
@@ -104,38 +105,3 @@ func CheckRole(roles []string) func(http.Handler) http.Handler {
 //-----
 //UTILS
 //-----
-
-func containsRole(jwtRoles []string, acceptableRoles []string) bool {
-	setAcceptableRoles := make(map[string]bool)
-	for _, v := range acceptableRoles {
-		setAcceptableRoles[v] = true
-	}
-
-	for _, jwtRole := range jwtRoles {
-		if _, exist := setAcceptableRoles[jwtRole]; exist {
-			return true
-		}
-	}
-	return false
-}
-
-type ResponseStatusCode struct {
-	http.ResponseWriter
-	statusCode int
-}
-
-func (rst *ResponseStatusCode) WriteHeader(statusCode int) {
-	rst.statusCode = statusCode
-	rst.ResponseWriter.WriteHeader(statusCode)
-}
-
-func getToken(w http.ResponseWriter, r *http.Request) string {
-	tokenHead := r.Header.Get("Authorization")
-	if tokenHead == "" {
-		http.Error(w, "Missing Authorization header", http.StatusUnauthorized)
-		return ""
-	}
-
-	tokenStr := strings.TrimPrefix(tokenHead, "Bearer ")
-	return tokenStr
-}

@@ -1,7 +1,7 @@
 package pgxDb
 
 import (
-	pb "Transactio/internal/auth-service/gRPC/proto"
+	pb "Transactio/internal/auth-service/gRPC/authProto"
 	"Transactio/internal/auth-service/models"
 	"Transactio/internal/auth-service/utils"
 	"context"

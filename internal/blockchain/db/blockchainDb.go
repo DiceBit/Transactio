@@ -1,4 +1,4 @@
-package pgxDb
+package db
 
 import (
 	"Transactio/internal/blockchain/models"
@@ -9,30 +9,46 @@ import (
 	"time"
 )
 
-func AddBlock(ctx context.Context, db *pgxpool.Pool, block *models.Blockchain) error {
+func AddBlock(ctx context.Context, db *pgxpool.Pool, block *models.Blockchain) (int, error) {
 	tx, err := db.Begin(ctx)
 	if err != nil {
-		return err
+		return -1, err
 	}
 	defer tx.Rollback(ctx)
 
 	fmd := block.Fmd
 	var batch = &pgx.Batch{}
-	batch.Queue(`insert into filemd(cid, owneraddr, filename, filesize, createat, status, version) 
-			VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-		fmd.Cid, fmd.OwnerAddr, fmd.FileName, fmd.FileSize, time.Unix(fmd.CreateAt, 0), fmd.Status, fmd.Version)
-	batch.Queue(`insert into blockchain(hash, prevblockhash, timestamp) 
-		VALUES ($1, $2, $3)`,
+	batch.Queue(`insert into filemd(cid, owneraddr, filename, filesize, isdelete, issecured)
+			VALUES ($1, $2, $3, $4, $5, $6)`,
+		fmd.Cid, fmd.OwnerAddr, fmd.FileName, fmd.FileSize, fmd.IsDelete, fmd.IsSecured)
+	batch.Queue(`insert into blockchain(hash, prevblockhash, timestamp)
+		VALUES ($1, $2, $3) RETURNING index`,
 		block.Hash, block.PrevBlockHash, time.Unix(block.Timestamp, 0))
 
 	res := tx.SendBatch(ctx, batch)
+
+	_, err = res.Exec()
+	if err != nil {
+		return -1, err
+	}
+
+	var index int
+	err = res.QueryRow().Scan(&index)
+	if err != nil {
+		return -1, err
+	}
+
 	err = res.Close()
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	tx.Commit(ctx)
-	return nil
+	return index, nil
+}
+
+func ReadBlock(ctx context.Context, db *pgxpool.Pool, index int) (*models.FileMD, error) {
+	return nil, nil
 }
 
 func PrevHash(ctx context.Context, db *pgxpool.Pool) (string, error) {

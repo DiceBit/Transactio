@@ -1,4 +1,4 @@
-package handlers
+package api_gateway
 
 import (
 	"Transactio/internal/api-gateway/middleware"
@@ -71,8 +71,7 @@ func NewGW(gwAddr string) *GW {
 	}
 	return &gwSrv
 }
-
-func (gw *GW) Start() {
+func (gw *GW) RunServer() {
 	logger := gw.logger
 	gatewayConf(gw)
 
@@ -94,6 +93,12 @@ func (gw *GW) Stop() {
 // ----
 func testA(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprintln(w, "Hello, Admin. ", req.URL.String())
+
+	/*file, header, err := req.FormFile("")
+	if err != nil {
+		return
+	}*/
+	//SaveFile(ctx context.Context, file multipart.File, owner, password string, isSecured bool) error {
 }
 func testU(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprintln(w, "Hello, User. ", req.URL.String())

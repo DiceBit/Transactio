@@ -1,7 +1,7 @@
 package services
 
 import (
-	authService "Transactio/internal/api-gateway/gRPC/proto"
+	authService "Transactio/internal/api-gateway/gRPC/authProto"
 	"context"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"
@@ -15,11 +15,11 @@ type AuthServ struct {
 }
 
 func NewAuthServ(addr string) (*AuthServ, error) {
-	conn, err := NewAuthConn(addr)
+	conn, err := authConn(addr)
 	if err != nil {
 		return nil, err
 	}
-	client := NewAuthClient(addr)
+	client := authClient(addr)
 
 	srv := AuthServ{
 		Addr:   addr,
@@ -39,7 +39,7 @@ func RegisterAuthSrvHandler(authConn *grpc.ClientConn, mux *runtime.ServeMux) er
 	return err
 }
 
-func NewAuthConn(authAddr string) (*grpc.ClientConn, error) {
+func authConn(authAddr string) (*grpc.ClientConn, error) {
 	grpcAuthServiceConn, err := grpc.NewClient(
 		authAddr,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
@@ -50,8 +50,8 @@ func NewAuthConn(authAddr string) (*grpc.ClientConn, error) {
 	return grpcAuthServiceConn, nil
 }
 
-func NewAuthClient(authAddr string) authService.AuthServiceClient {
-	conn, _ := NewAuthConn(authAddr)
+func authClient(authAddr string) authService.AuthServiceClient {
+	conn, _ := authConn(authAddr)
 	client := authService.NewAuthServiceClient(conn)
 	return client
 }

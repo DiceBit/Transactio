@@ -25,8 +25,7 @@ func (bc *Blockchain) SetHash() {
 }
 
 func SetGenesisBlock() *Blockchain {
-
-	dataGenesis := NewData("", "genesis", "Genesis Block", 0, 0, false)
+	dataGenesis := NewData("", "genesis", "Genesis Block", 0, false, false)
 	genesisBlock := Blockchain{
 		PrevBlockHash: "",
 		Timestamp:     time.Now().Unix(),

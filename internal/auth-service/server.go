@@ -1,27 +1,82 @@
-package server
+package auth_service
 
 import (
 	"Transactio/internal/auth-service/db"
-	pb "Transactio/internal/auth-service/gRPC/proto"
+	pb "Transactio/internal/auth-service/gRPC/authProto"
 	userUtils "Transactio/internal/auth-service/utils"
+	"Transactio/pkg/dbConn/pgx"
+	"Transactio/pkg/zaplog"
 	"context"
+	"fmt"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"log"
+	"net"
 )
 
 type AuthServiceServer struct {
 	pb.UnimplementedAuthServiceServer
 	grpcServer *grpc.Server
-	db         *pgxpool.Pool
 
+	db     *pgxpool.Pool
 	logger *zap.Logger
 
 	authName string
 	authAddr string
+}
+
+func NewAuthService(authName, authAddr string) (*AuthServiceServer, error) {
+	logger := zaplog.NewLogger(userUtils.AuthLog)
+
+	grpcServer := grpc.NewServer(grpc.UnaryInterceptor(userUtils.LogInterceptor(logger)))
+
+	db, err := pgx.New()
+	if err != nil {
+		log.Println("Error with DB", err)
+		return nil, err
+	}
+	logger.Info("pgx DB connected")
+
+	authServ := AuthServiceServer{
+		db:         db,
+		logger:     logger,
+		authName:   authName,
+		authAddr:   authAddr,
+		grpcServer: grpcServer,
+	}
+	return &authServ, nil
+}
+func (authServ *AuthServiceServer) RunServe() {
+	authName := authServ.authName
+	authServiceAddr := authServ.authAddr
+	logger := authServ.logger
+
+	listen, err := net.Listen("tcp", authServiceAddr)
+	if err != nil {
+		logger.Fatal("Error with starting", zap.String("servName", authName), zap.Error(err))
+	}
+
+	logger.Info(fmt.Sprintf("%s is running on %s", authName, authServiceAddr))
+
+	pb.RegisterAuthServiceServer(authServ.grpcServer, authServ)
+
+	err = authServ.grpcServer.Serve(listen)
+	if err != nil {
+		logger.Fatal("Error with serve", zap.Error(err))
+	}
+
+}
+func (authServ *AuthServiceServer) StopServe() {
+	msg := fmt.Sprintf("%s is stopped", authServ.authName)
+	authServ.logger.Info(msg)
+
+	authServ.db.Close()
+	_ = authServ.logger.Sync()
+	authServ.grpcServer.GracefulStop()
 }
 
 func (authServ *AuthServiceServer) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
@@ -113,7 +168,6 @@ func (authServ *AuthServiceServer) SignUp(ctx context.Context, req *pb.SignUpReq
 
 	return &pb.SignUpResponse{Token: token}, nil
 }
-
 func (authServ *AuthServiceServer) ValidateJWT(_ context.Context, req *pb.JwtRequest) (*pb.JwtResponse, error) {
 	claims, err := userUtils.ValidateJWT(req.Token)
 	if err != nil {

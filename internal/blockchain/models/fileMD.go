@@ -2,7 +2,6 @@ package models
 
 import (
 	"strconv"
-	"time"
 )
 
 // File metadata
@@ -12,36 +11,30 @@ type FileMD struct {
 
 	FileName string
 	FileSize int
-	CreateAt int64
 
-	Status  bool // active or delete
-	Version int  // Версия файла
+	IsDelete  bool // active or delete
+	IsSecured bool
 }
 
 func NewData(
 	cid, owner, fileName string,
-	fileSize, version int,
-	status bool) *FileMD {
+	fileSize int, isDelete, isSecured bool) *FileMD {
 
-	timestamp := time.Now().Unix()
 	data := &FileMD{
 		Cid:       cid,
 		OwnerAddr: owner,
 
 		FileName: fileName,
 		FileSize: fileSize,
-		CreateAt: timestamp,
 
-		Status:  status,
-		Version: version,
-		//accessList: accessList,
+		IsDelete:  isDelete,
+		IsSecured: isSecured,
 	}
 	return data
 }
 
 func (f *FileMD) fmdToString() string {
-	timestamp := strconv.FormatInt(f.CreateAt, 10)
 	header := f.Cid + f.OwnerAddr + f.FileName +
-		strconv.Itoa(f.FileSize) + timestamp + strconv.FormatBool(f.Status) + strconv.Itoa(f.Version)
+		strconv.Itoa(f.FileSize) + strconv.FormatBool(f.IsDelete) + strconv.FormatBool(f.IsSecured)
 	return header
 }

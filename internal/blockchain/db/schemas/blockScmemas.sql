@@ -1,13 +1,15 @@
 create table if not exists FileMD
 (
     Id        serial primary key,
+
     Cid       varchar(255) not null,
     ownerAddr varchar(255) not null,
     fileName  varchar(255) not null,
+
     fileSize  smallint     not null check (fileSize >= 0),
-    createAt  timestamp    not null default clock_timestamp(),
-    status    boolean      not null default false,
-    version   smallint     not null check (fileSize >= 0)
+
+    isDelete  boolean      not null default true, --true-delete, false - no
+    isSecured boolean      not null default false  --есть пароль или нет
 );
 
 create table if not exists Blockchain

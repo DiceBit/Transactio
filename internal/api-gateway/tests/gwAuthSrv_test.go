@@ -1,7 +1,7 @@
 package tests
 
 import (
-	pb "Transactio/internal/api-gateway/gRPC/proto"
+	pb "Transactio/internal/api-gateway/gRPC/authProto"
 	"context"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
