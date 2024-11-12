@@ -31,7 +31,8 @@ func testHTTP(srv *blockchain.BcSrv) {
 	router := mux.NewRouter()
 
 	router.HandleFunc("/", zxc)
-	router.HandleFunc("/file", srv.TestGetFile).Methods(http.MethodPost)
+	router.HandleFunc("/file", srv.TestSaveFile).Methods(http.MethodPost)
+	router.HandleFunc("/getFile", srv.TestGetFile).Methods(http.MethodPost)
 	http.ListenAndServe(":8089", router)
 }
 func zxc(w http.ResponseWriter, req *http.Request) {

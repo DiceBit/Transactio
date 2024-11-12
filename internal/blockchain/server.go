@@ -9,22 +9,25 @@ import (
 	mongodb "Transactio/pkg/dbConn/mongo"
 	"Transactio/pkg/dbConn/pgx"
 	"Transactio/pkg/zaplog"
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.uber.org/zap"
-	"log"
+	"io"
 	"mime/multipart"
 	"net/http"
+	"strings"
 	"time"
 )
 
 type BcSrv struct {
-	fsSrv  *gRPC.FileStorageServ
-	db     *pgxpool.Pool
-	Mongo  *mongo.Client
-	logger *zap.Logger
+	fsSrv    *gRPC.FileStorageServ
+	postgres *pgxpool.Pool
+	Mongo    *mongo.Client
+	logger   *zap.Logger
 
 	BcName string
 	BcAddr string
@@ -60,9 +63,9 @@ func NewBcSrv() (*BcSrv, error) {
 	srv := BcSrv{
 		fsSrv: fsServ,
 
-		db:     bcDb,
-		Mongo:  monDb,
-		logger: logger,
+		postgres: bcDb,
+		Mongo:    monDb,
+		logger:   logger,
 
 		BcName: utils.BcName,
 		BcAddr: utils.BcAddr,
@@ -78,21 +81,21 @@ func (srv *BcSrv) StopServer() {
 	srv.logger.Info(fmt.Sprintf("%s is stopped", srv.BcName))
 
 	srv.fsSrv.Conn.Close()
-	srv.db.Close()
+	srv.postgres.Close()
 	_ = srv.logger.Sync()
 	_ = srv.Mongo.Disconnect(context.Background())
 }
 func (srv *BcSrv) setGenesisBlock(ctx context.Context) {
 	log := srv.logger
 
-	exist, err := db.CheckGenBlock(ctx, srv.db)
+	exist, err := db.CheckGenBlock(ctx, srv.postgres)
 	if err != nil {
 		log.Error("Error with check genesis block")
 		return
 	}
 	if !exist {
 		genesisBlock := models.SetGenesisBlock()
-		if _, err = db.AddBlock(ctx, srv.db, genesisBlock); err != nil {
+		if _, err = db.AddBlock(ctx, srv.postgres, genesisBlock); err != nil {
 			log.Error("Error with adding genesis block", zap.Error(err))
 			return
 		}
@@ -102,43 +105,78 @@ func (srv *BcSrv) setGenesisBlock(ctx context.Context) {
 	}
 }
 
-func (srv *BcSrv) TestGetFile(w http.ResponseWriter, req *http.Request) {
+func (srv *BcSrv) TestSaveFile(w http.ResponseWriter, req *http.Request) {
 	file, handler, err := req.FormFile("file")
 	if err != nil {
-		log.Printf("\n %v \n", err)
 		return
 	}
-	if err := srv.SaveFile(context.Background(), file, handler, "testOwner", "zxc", true); err != nil {
+	defer file.Close()
+
+	usr := req.FormValue("username")
+	pswd := req.FormValue("pswd")
+
+	if cid, err := srv.SaveFile(context.Background(), file, handler, usr, pswd, len(pswd) != 0); err != nil {
 		http.Error(w, "Save file error", http.StatusInternalServerError)
 		return
+	} else {
+		w.Write([]byte(fmt.Sprintf("<html><body><h1>File uploaded successfully. Cid: </h1></body></html>", cid)))
 	}
-	w.Write([]byte("<html><body><h1>File uploaded successfully</h1></body></html>"))
+}
+
+type fileInfoDTO struct {
+	Username string `json:"username"`
+	FileName string `json:"fileName"`
+	Pswd     string `json:"pswd"`
+}
+
+func (srv *BcSrv) TestGetFile(w http.ResponseWriter, req *http.Request) {
+
+	body, err := io.ReadAll(req.Body)
+	if err != nil {
+		return
+	}
+	var info fileInfoDTO
+	err = json.Unmarshal(body, &info)
+	if err != nil {
+		return
+	}
+
+	if file, err := srv.GetFile(context.Background(), info.Username, info.FileName, info.Pswd); err != nil {
+		http.Error(w, "Get file error", http.StatusInternalServerError)
+		return
+	} else {
+		w.Header().Set("Content-Disposition", "attachment; filename="+info.FileName)
+		w.Header().Set("Content-Type", "application/octet-stream")
+		w.Header().Set("Content-Length", string(rune(len(file))))
+		http.ServeContent(w, req, info.FileName, time.Unix(1, 0), bytes.NewReader(file))
+	}
+	//w.Write([]byte("<html><body><h1>File uploaded successfully</h1></body></html>"))
 }
 
 /*FUNC FOR GATEWAY SERVICE*/
-func (srv *BcSrv) SaveFile(ctx context.Context, file multipart.File, fileInfo *multipart.FileHeader, owner, password string, isSecured bool) error {
+func (srv *BcSrv) SaveFile(ctx context.Context, file multipart.File, fileInfo *multipart.FileHeader, owner, pswd string, isSecured bool) (string, error) {
 	fsSrv := srv.fsSrv.Client
 
 	fileBytes, err := utils.ConvertMultipartToBytes(file)
 	if err != nil {
 		srv.logger.Error("Failed to convert multipart to bytes.", zap.Error(err))
-		return err
+		return "", err
 	}
 
 	fileResponse, err := fsSrv.AddFile(ctx, &fsProto.AddFileRequest{
 		File:      fileBytes,
-		Password:  password,
+		Password:  pswd,
 		IsSecured: isSecured,
 	})
 	if err != nil {
 		srv.logger.Error("Error from file-storage service", zap.Error(err))
-		return err
+		return "", err
 	}
 
-	prevBlockHash, err := db.PrevHash(ctx, srv.db)
+	prevBlockHash, err := db.PrevHash(ctx, srv.postgres)
 	if err != nil {
 		srv.logger.Error("Error with getting prevBlockHash", zap.Error(err))
-		return err
+		return "", err
 	}
 
 	cid := fileResponse.GetCid()
@@ -150,23 +188,56 @@ func (srv *BcSrv) SaveFile(ctx context.Context, file multipart.File, fileInfo *m
 	}
 	newBlock.SetHash()
 
-	index, err := db.AddBlock(ctx, srv.db, newBlock)
+	index, err := db.AddBlock(ctx, srv.postgres, newBlock)
 	if err != nil {
 		srv.logger.Error("Error with adding block", zap.Error(err))
-		return err
+		return "", err
 	}
 
 	if err = db.InsertInfo(ctx, srv.Mongo, owner, fileInfo.Filename, index); err != nil {
 		srv.logger.Error("Error when insert data in mongo", zap.Error(err))
-		return err
+		return "", err
 	}
 
 	srv.logger.Info(fmt.Sprintf("Block(%s) has been added", cid[:25]))
-	return nil
+	return cid, nil
 }
+
+func (srv *BcSrv) GetFile(ctx context.Context, username, fileName, pswd string) ([]byte, error) {
+	fsSrv := srv.fsSrv.Client
+
+	info, err := db.UsrInfo(ctx, srv.Mongo, username)
+	if err != nil {
+		srv.logger.Error("Error getting userInfo from mongo", zap.Error(err))
+		return nil, err
+	}
+
+	fileName = strings.ReplaceAll(fileName, ".", "_")
+	index := info.Info[fileName]
+	md, err := db.ReadBlock(ctx, srv.postgres, index)
+	if err != nil {
+		srv.logger.Error("Error getting fileMD data by index", zap.Error(err))
+		return nil, err
+	}
+
+	if md.IsDelete {
+		srv.logger.Info(fmt.Sprintf("File(%v) is deleted", md.FileName))
+		return nil, err
+	}
+
+	file, err := fsSrv.GetFile(ctx, &fsProto.GetFileRequest{
+		Cid:       md.Cid,
+		Password:  pswd,
+		IsSecured: md.IsSecured,
+	})
+	if err != nil {
+		srv.logger.Error("Error with getting file from fs service", zap.Error(err))
+		return nil, err
+	}
+
+	return file.GetFileReader(), nil
+}
+
 func (srv *BcSrv) DeleteFile(ctx context.Context, cid string) error {
 	return nil
-}
-func (srv *BcSrv) GetFile() {
-
 }

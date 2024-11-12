@@ -87,15 +87,13 @@ func (srv *FsServer) AddFile(ctx context.Context, req *fsProto.AddFileRequest) (
 		return nil, status.Errorf(codes.Internal, "Error when adding file. %v", err)
 	}
 
-	fmt.Printf("\n %v \n", cid)
-
 	err = sh.Pin(cid)
 	if err != nil {
 		log.Error("Error when pinning file", zap.Error(err))
 		return nil, status.Errorf(codes.Internal, "Error when pinning file. %v", err)
 	}
 
-	log.Info("File added")
+	log.Info(fmt.Sprintf("File(%v) added", cid[:25]))
 	return &fsProto.AddFileResponse{Cid: cid}, nil
 }
 func (srv *FsServer) GetFile(ctx context.Context, req *fsProto.GetFileRequest) (response *fsProto.GetFileResponse, err error) {
@@ -132,7 +130,6 @@ func (srv *FsServer) RemoveFile(ctx context.Context, req *fsProto.RemoveFileRequ
 }
 
 func encrypted(f []byte, password string, isSecured bool) (reader *bytes.Reader, err error) {
-
 	var encryptedFile []byte
 
 	if !isSecured {
@@ -146,7 +143,6 @@ func encrypted(f []byte, password string, isSecured bool) (reader *bytes.Reader,
 			return nil, err
 		}
 	}
-
 	reader = bytes.NewReader(encryptedFile)
 	return reader, nil
 }
@@ -155,7 +151,6 @@ func decrypted(r io.Reader, password string, isSecured bool) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	var decryptedFile []byte
 	if !isSecured {
 		decryptedFile, err = utils.DecryptData(bytesReader, utils.DefaultKey)

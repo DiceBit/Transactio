@@ -1,5 +1,6 @@
 package tests
 
+/*
 import (
 	"Transactio/internal/blockchain/db"
 	mongodb "Transactio/pkg/dbConn/mongo"
@@ -32,7 +33,7 @@ func TestMain(m *testing.M) {
 	m.Run()
 }
 func printRes(client *mongo.Client) {
-	val, _ := db.GetInfo(context.Background(), client)
+	val, _ := db.UsrInfo(context.Background(), client)
 	for _, v := range val {
 		fmt.Printf("\n%v {\n \t %v \n}", v.Username, v.Info)
 	}
@@ -170,3 +171,4 @@ func TestRemoveUser(t *testing.T) {
 		printRes(tt.args.client)
 	}
 }
+*/

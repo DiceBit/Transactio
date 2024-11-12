@@ -47,7 +47,6 @@ func EncryptData(data []byte, password string) ([]byte, error) {
 
 	return ciphertext, nil
 }
-
 func DecryptData(encryptedData []byte, password string) ([]byte, error) {
 	if len(encryptedData) < saltSize+aes.BlockSize {
 		return nil, errors.New("invalid encrypted data")
@@ -73,6 +72,7 @@ func DecryptData(encryptedData []byte, password string) ([]byte, error) {
 	mode.CryptBlocks(plaintext, ciphertext)
 
 	padding := int(plaintext[len(plaintext)-1])
+
 	if padding > aes.BlockSize || padding == 0 {
 		return nil, errors.New("invalid padding size")
 	}

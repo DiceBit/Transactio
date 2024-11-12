@@ -47,8 +47,22 @@ func AddBlock(ctx context.Context, db *pgxpool.Pool, block *models.Blockchain) (
 	return index, nil
 }
 
-func ReadBlock(ctx context.Context, db *pgxpool.Pool, index int) (*models.FileMD, error) {
-	return nil, nil
+func ReadBlock(ctx context.Context, db *pgxpool.Pool, index int) (models.FileMD, error) {
+	var md models.FileMD
+
+	err := db.QueryRow(ctx, `select cid, owneraddr, filename, filesize, isdelete, issecured from filemd where id=$1`, index).Scan(
+		&md.Cid,
+		&md.OwnerAddr,
+		&md.FileName,
+		&md.FileSize,
+		&md.IsDelete,
+		&md.IsSecured,
+	)
+	if err != nil {
+		return models.FileMD{}, err
+	}
+
+	return md, nil
 }
 
 func PrevHash(ctx context.Context, db *pgxpool.Pool) (string, error) {
